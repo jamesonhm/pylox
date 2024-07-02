@@ -1,14 +1,18 @@
 import sys
 
+from scanner import Scanner
+from error_handler import ErrorHandler
+
+
 class Lox:
     def __init__(self):
-        self.had_error: bool = False
+        self.error_handler = ErrorHandler()
 
     def run_file(self, path: str) -> None:
         with open(path, 'r') as f:
             content = f.read()
             self.run(content)
-            if self.had_error:
+            if self.error_handler.had_error:
                 sys.exit(65)
 
     def run_prompt(self) -> None:
@@ -16,23 +20,19 @@ class Lox:
             print("############# PYLOX Interactive #############")
             while True:
                 self.run(input(">>> "))
-                self.had_error = False
+                self.error_handler.had_error = False
         except KeyboardInterrupt:
             print("\nKeyboardInterrupt")
 
     def run(self, source: str) -> None:
-        scanner = Scanner(source)
+        scanner = Scanner(source, self.error_handler)
         tokens = scanner.scan_tokens()
 
         for token in tokens:
             print(token)
-
-    def error(self, line: int, message: str) -> None:
-        self._report(line, "", message)
-
-    def _report(self, line: int, where: str, message: str) -> None:
-        print(f"[line {line}] Error {where}: {message}")
-        self.had_error = True
+        
+        if self.error_handler.had_error:
+            return
 
 
 if __name__ == "__main__":
