@@ -5,8 +5,8 @@ from error_handler import ErrorHandler
 
 
 class Lox:
-    def __init__(self):
-        self.error_handler = ErrorHandler()
+    def __init__(self, error_handler: ErrorHandler):
+        self.error_handler = error_handler
 
     def run_file(self, path: str) -> None:
         with open(path, 'r') as f:
@@ -36,7 +36,8 @@ class Lox:
 
 
 if __name__ == "__main__":
-    lox = Lox()
+    error_handler = ErrorHandler()
+    lox = Lox(error_handler)
     if len(sys.argv[1:]) > 1:
         print(f"Usage: pylox [script]")
         sys.exit(64)
