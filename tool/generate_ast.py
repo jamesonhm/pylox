@@ -8,18 +8,58 @@ def main():
     output_dir = sys.argv[1]
 
     define_ast(output_dir, "Expr", [
-        {"Binary": ["Expr left", "Token operator", "Expr right"]},
-        {"Grouping": ["Expr expression"]},
-        {"Literal": ["object value"]},
-        {"Unary": ["Token operator", "Expr right"]}
+        {"Binary": ["left: Expr", "operator: Token", "right: Expr"]},
+        {"Grouping": ["expression: Expr"]},
+        {"Literal": ["value: Any"]},
+        {"Unary": ["operator: Token", "right: Expr"]}
     ])
 
 def define_ast(output_dir: str, base_name: str, types: list[dict[str, list[str]]]):
-    path = f"{output_dir}/{base_name}.py"
-    with open(path, "w", encoding="UTF-8") as f:
-        f.writelines(["from abc import ABC, abstractmethod",
-                      "from token import Token",
+    path = f"{output_dir}/{base_name.lower()}.py"
+    with open(path, "w", encoding="UTF-8") as writer:
+        writer.writelines(["from abc import ABC, abstractmethod\n",
+                           "from typing import Any\n",
+                           "from token import Token\n",
+                           "from visitor import Visitor\n",
+                           "\n",
+                           f"class {base_name}(ABC):\n",
+                           "\t@abstractmethod\n",
+                           f"\tdef accept(self, visitor: Visitor):\n",
+                           "\t\tpass\n\n"
+        ])
+
+        for t in types:
+            classname = list(t.keys())[0]
+            fields = t[classname]
+            define_type(writer, base_name, classname, fields)
+
+    define_visitor(output_dir, base_name, types)
+
+def define_visitor(output_dir, base_name, types):
+    path = f"{output_dir}/visitor.py"
+    with open(path, "w") as writer:
+        writer.writelines(["from abc import ABC, abstractmethod\n",
+                      "\n",
+                      f"class Visitor(ABC):\n",
                       "\n"
-                      ])
-        # f.writelines
+        ])
+        for t in types:
+            classname = list(t.keys())[0]
+            writer.write("\t@abstractmethod\n")
+            writer.write(f"\tdef visit_{classname.lower()}_{base_name.lower()}(self, expr: {classname}):\n")
+            writer.write(f"\t\tpass\n\n")
+
+def define_type(writer, base, classname, fields):
+    str_fields = ", ".join(fields)
+    writer.write(f"class {classname}({base}):\n")
+    writer.write(f"\tdef __init__(self, {str_fields}):\n")
+    for field in fields:
+        name = field.split(': ')[0]
+        writer.write(f"\t\tself.{name} = {name}\n")
+    writer.write(f"\n")
+    writer.write(f"\tdef accept(self, visitor: Visitor):\n")
+    writer.write(f"\t\treturn visitor.visit_{classname.lower()}_expr(self)\n\n")
+
+if __name__ == "__main__":
+    main()
 
