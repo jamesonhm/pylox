@@ -36,6 +36,40 @@ class AstPrinter(Visitor):
         builder.append(")")
         return ''.join(builder)
 
+class AstTree(Visitor):
+
+    def __init__(self):
+        self.lines = []
+
+    def print_tree(self, expr):
+        return expr.accept(self)
+
+    def visit_binary_expr(self, expr: Binary):
+        return self._branch(expr.operator.lexeme, expr.left, expr.right)
+
+    def visit_grouping_expr(self, expr: Grouping):
+        return self._branch("()", expr.expression)
+
+    def visit_literal_expr(self, expr: Literal):
+        if expr.value is None:
+            return "nil"
+        return str(expr.value)
+
+    def visit_unary_expr(self, expr: Unary):
+        return self._branch(expr.operator.lexeme, expr.right)
+
+    def visit_expression_stmt(self):
+        pass
+
+    def _branch(self, node, *leafs):
+        lines = []
+        lines.append(node)
+        for leaf in leafs:
+            lines.append(leaf.accept(self))
+        # return '\n'.join(lines)
+        return lines
+
+
 def main():
     expression = Binary(
         Unary(
@@ -48,6 +82,7 @@ def main():
         )
     )
     print(AstPrinter().print_ast(expression))
+    print(AstTree().print_tree(expression))
 
 if __name__ == "__main__":
     main()

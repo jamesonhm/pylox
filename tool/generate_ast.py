@@ -47,10 +47,10 @@ def define_visitor(output_dir, base_types):
 
     with open(path, "w") as writer:
         writer.writelines(["from abc import ABC, abstractmethod\n",
-                      "\n",
-                      f"class Visitor(ABC):\n",
-                      "\n"
-        ])
+                           "\n",
+                           f"class Visitor(ABC):\n",
+                           "\n"
+                           ])
         for base in base_types:
             base_name = base[0]
             types = base[1]
