@@ -6,13 +6,21 @@ def main():
         sys.exit(64)
     
     output_dir = sys.argv[1]
-
-    define_ast(output_dir, "Expr", [
+    
+    expr_types = [
         {"Binary": ["left: Expr", "operator: Token", "right: Expr"]},
         {"Grouping": ["expression: Expr"]},
         {"Literal": ["value: Any"]},
         {"Unary": ["operator: Token", "right: Expr"]}
-    ])
+    ]
+    
+    stmt_types = [
+        {"Expression": ["expression: Expr"]}
+    ]
+    base_types = list(zip(["Expr", "Stmt"], [expr_types, stmt_types]))
+
+    define_ast(output_dir, "Expr", expr_types)
+    define_visitor(output_dir, base_types)
 
 def define_ast(output_dir: str, base_name: str, types: list[dict[str, list[str]]]):
     path = f"{output_dir}/{base_name.lower()}.py"
@@ -33,21 +41,24 @@ def define_ast(output_dir: str, base_name: str, types: list[dict[str, list[str]]
             fields = t[classname]
             define_type(writer, base_name, classname, fields)
 
-    define_visitor(output_dir, base_name, types)
 
-def define_visitor(output_dir, base_name, types):
+def define_visitor(output_dir, base_types):
     path = f"{output_dir}/visitor.py"
+
     with open(path, "w") as writer:
         writer.writelines(["from abc import ABC, abstractmethod\n",
                       "\n",
                       f"class Visitor(ABC):\n",
                       "\n"
         ])
-        for t in types:
-            classname = list(t.keys())[0]
-            writer.write("\t@abstractmethod\n")
-            writer.write(f"\tdef visit_{classname.lower()}_{base_name.lower()}(self, expr: {classname}):\n")
-            writer.write(f"\t\tpass\n\n")
+        for base in base_types:
+            base_name = base[0]
+            types = base[1]
+            for t in types:
+                classname = list(t.keys())[0]
+                writer.write("\t@abstractmethod\n")
+                writer.write(f"\tdef visit_{classname.lower()}_{base_name.lower()}(self, expr):\n")
+                writer.write(f"\t\tpass\n\n")
 
 def define_type(writer, base, classname, fields):
     str_fields = ", ".join(fields)
