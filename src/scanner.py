@@ -89,7 +89,7 @@ class Scanner:
                 elif self._is_alpha(c):
                     self._identifier()
                 else:
-                    self.error_handler.error(self._line, "Unexpected character.")
+                    self.error_handler.scanner_error(self._line, self._current, "Unexpected character.")
 
     def _is_at_end(self) -> bool:
         return (self._current >= len(self.source))
