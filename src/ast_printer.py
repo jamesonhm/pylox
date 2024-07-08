@@ -11,6 +11,7 @@ class AstPrinter(Visitor):
         return expr.accept(self)
 
     def visit_binary_expr(self, expr: Binary) -> str:
+        print(f"Binary expression {expr} visited")
         return self._parenthesize(expr.operator.lexeme, expr.left, expr.right)
 
     def visit_grouping_expr(self, expr: Grouping) -> str:

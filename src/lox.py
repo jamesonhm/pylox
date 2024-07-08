@@ -30,6 +30,7 @@ class Lox:
     def run(self, source: str) -> None:
         scanner = Scanner(source, self.error_handler)
         tokens = scanner.scan_tokens()
+        print(f"Tokens from Scanner: {tokens}")
 
         parser = Parser(tokens, self.error_handler)
 
