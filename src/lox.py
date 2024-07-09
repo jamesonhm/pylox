@@ -1,14 +1,17 @@
 import sys
 
-from scanner import Scanner
-from error_handler import ErrorHandler
 from ast_printer import AstPrinter
+from error_handler import ErrorHandler
+from interpreter import Interpreter
 from parser import Parser
+from scanner import Scanner
 from token import Token
 
 
+
 class Lox:
-    def __init__(self, error_handler: ErrorHandler):
+    def __init__(self, interpreter: Interpreter = Interpreter(), error_handler: ErrorHandler = ErrorHandler()):
+        self.interpreter = interpreter
         self.error_handler = error_handler
 
     def run_file(self, path: str) -> None:
@@ -17,6 +20,8 @@ class Lox:
             self.run(content)
             if self.error_handler.had_error:
                 sys.exit(65)
+            if self.error_handler.had_runtime_error:
+                sys.exit(70)
 
     def run_prompt(self) -> None:
         try:
@@ -39,12 +44,11 @@ class Lox:
         if self.error_handler.had_error:
             return
         
-        if expression is not None:
-            print(AstPrinter().print_ast(expression))
+        self.interpreter.interpret(expression)
+
 
 if __name__ == "__main__":
-    error_handler = ErrorHandler()
-    lox = Lox(error_handler)
+    lox = Lox()
     if len(sys.argv[1:]) > 1:
         print(f"Usage: pylox [script]")
         sys.exit(64)

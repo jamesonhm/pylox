@@ -5,13 +5,24 @@ from expr import (
     Literal,
     Unary
 )
-from token import Token 
+from token import Token
+from error_handler import ErrorHandler 
 from tokentype import TokenType
 from runtime_error import LoxRuntimeError
 from visitor import Visitor
 
 
 class Interpreter(Visitor):
+
+    def __init__(self, error_handler: ErrorHandler):
+        self.error_handler = error_handler
+
+    def interpret(self, expr: Expr):
+        try:
+            value = self._evaluate(expr)
+            print(self._stringify(value))
+        except LoxRuntimeError as e:
+            self.error_handler.runtime_error(e)
 
     def _evaluate(self, expr: Expr):
         return expr.accept(self)
@@ -98,6 +109,16 @@ class Interpreter(Visitor):
         if a == None:
             return False
         return a == b
+
+    def _stringify(self, object):
+        if object is None:
+            return "nil"
+        if isinstance(object, float):
+            text = str(object)
+            if text.endswith(".0"):
+                text = text[:-2]
+            return text
+        return str(object)
 
     def visit_expression_stmt(self):
         pass
