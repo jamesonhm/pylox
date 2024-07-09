@@ -10,7 +10,7 @@ from token import Token
 
 
 class Lox:
-    def __init__(self, interpreter: Interpreter = Interpreter(), error_handler: ErrorHandler = ErrorHandler()):
+    def __init__(self, interpreter: Interpreter, error_handler: ErrorHandler):
         self.interpreter = interpreter
         self.error_handler = error_handler
 
@@ -39,16 +39,18 @@ class Lox:
 
         parser = Parser(tokens, self.error_handler)
 
-        expression = parser.parse()
+        statements = parser.parse()
         
         if self.error_handler.had_error:
             return
         
-        self.interpreter.interpret(expression)
+        self.interpreter.interpret(statements)
 
 
 if __name__ == "__main__":
-    lox = Lox()
+    error_handler = ErrorHandler()
+    interpreter = Interpreter(error_handler)
+    lox = Lox(interpreter, error_handler)
     if len(sys.argv[1:]) > 1:
         print(f"Usage: pylox [script]")
         sys.exit(64)

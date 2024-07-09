@@ -5,8 +5,14 @@ from expr import (
     Literal,
     Unary
 )
+from stmt import (
+    Stmt,
+    Expression,
+    Print
+)
+
 from token import Token
-from error_handler import ErrorHandler 
+from error_handler import ErrorHandler
 from tokentype import TokenType
 from runtime_error import LoxRuntimeError
 from visitor import Visitor
@@ -17,15 +23,27 @@ class Interpreter(Visitor):
     def __init__(self, error_handler: ErrorHandler):
         self.error_handler = error_handler
 
-    def interpret(self, expr: Expr):
+    def interpret(self, statements: list[Stmt]):
         try:
-            value = self._evaluate(expr)
-            print(self._stringify(value))
+            for statement in statements:
+                self._execute(statement)
         except LoxRuntimeError as e:
             self.error_handler.runtime_error(e)
 
     def _evaluate(self, expr: Expr):
         return expr.accept(self)
+
+    def _execute(self, stmt):
+        stmt.accept(self)
+
+    def visit_expression_stmt(self, stmt: Expression):
+        self._evaluate(stmt.expression)
+        return None
+
+    def visit_print_stmt(self, stmt: Print):
+        value = self._evaluate(stmt.expression)
+        print(self._stringify(value))
+        return None
 
     def visit_binary_expr(self, expr: Binary):
         left = self._evaluate(expr.left)
@@ -120,6 +138,4 @@ class Interpreter(Visitor):
             return text
         return str(object)
 
-    def visit_expression_stmt(self):
-        pass
 

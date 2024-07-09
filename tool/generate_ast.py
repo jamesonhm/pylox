@@ -15,26 +15,31 @@ def main():
     ]
     
     stmt_types = [
-        {"Expression": ["expression: Expr"]}
+        {"Expression": ["expression: Expr"]},
+        {"Print": ["expression: Expr"]}
     ]
     base_types = list(zip(["Expr", "Stmt"], [expr_types, stmt_types]))
 
     define_ast(output_dir, "Expr", expr_types)
+    define_ast(output_dir, "Stmt", stmt_types)
     define_visitor(output_dir, base_types)
 
 def define_ast(output_dir: str, base_name: str, types: list[dict[str, list[str]]]):
     path = f"{output_dir}/{base_name.lower()}.py"
     with open(path, "w", encoding="UTF-8") as writer:
-        writer.writelines(["from abc import ABC, abstractmethod\n",
-                           "from typing import Any\n",
-                           "from token import Token\n",
-                           "from visitor import Visitor\n",
-                           "\n",
-                           f"class {base_name}(ABC):\n",
-                           "\t@abstractmethod\n",
-                           f"\tdef accept(self, visitor: Visitor):\n",
-                           "\t\tpass\n\n"
-        ])
+        lines = ["from abc import ABC, abstractmethod\n",
+                 "from typing import Any\n",
+                 "from token import Token\n",
+                 "from visitor import Visitor\n"]
+        if base_name == "Stmt":
+            lines += ["from expr import Expr\n"]
+        lines += ["\n",
+                  f"class {base_name}(ABC):\n",
+                  "\t@abstractmethod\n",
+                  f"\tdef accept(self, visitor: Visitor):\n",
+                  "\t\tpass\n\n"]
+
+        writer.writelines(lines)
 
         for t in types:
             classname = list(t.keys())[0]
@@ -69,7 +74,7 @@ def define_type(writer, base, classname, fields):
         writer.write(f"\t\tself.{name} = {name}\n")
     writer.write(f"\n")
     writer.write(f"\tdef accept(self, visitor: Visitor):\n")
-    writer.write(f"\t\treturn visitor.visit_{classname.lower()}_expr(self)\n\n")
+    writer.write(f"\t\treturn visitor.visit_{classname.lower()}_{base.lower()}(self)\n\n")
 
 if __name__ == "__main__":
     main()

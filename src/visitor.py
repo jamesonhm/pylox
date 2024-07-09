@@ -22,3 +22,7 @@ class Visitor(ABC):
 	def visit_expression_stmt(self, expr):
 		pass
 
+	@abstractmethod
+	def visit_print_stmt(self, expr):
+		pass
+
