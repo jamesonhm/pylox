@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Any
 from token import Token
 from visitor import Visitor
 from expr import Expr
@@ -22,4 +21,12 @@ class Print(Stmt):
 
 	def accept(self, visitor: Visitor):
 		return visitor.visit_print_stmt(self)
+
+class Var(Stmt):
+	def __init__(self, name: Token, initializer: Expr):
+		self.name = name
+		self.initializer = initializer
+
+	def accept(self, visitor: Visitor):
+		return visitor.visit_var_stmt(self)
 

@@ -11,12 +11,14 @@ def main():
         {"Binary": ["left: Expr", "operator: Token", "right: Expr"]},
         {"Grouping": ["expression: Expr"]},
         {"Literal": ["value: Any"]},
-        {"Unary": ["operator: Token", "right: Expr"]}
+        {"Unary": ["operator: Token", "right: Expr"]},
+        {"Variable": ["name: Token"]}
     ]
     
     stmt_types = [
         {"Expression": ["expression: Expr"]},
-        {"Print": ["expression: Expr"]}
+        {"Print": ["expression: Expr"]},
+        {"Var": ["name: Token", "initializer: Expr"]}
     ]
     base_types = list(zip(["Expr", "Stmt"], [expr_types, stmt_types]))
 

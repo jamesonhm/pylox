@@ -19,10 +19,18 @@ class Visitor(ABC):
 		pass
 
 	@abstractmethod
+	def visit_variable_expr(self, expr):
+		pass
+
+	@abstractmethod
 	def visit_expression_stmt(self, expr):
 		pass
 
 	@abstractmethod
 	def visit_print_stmt(self, expr):
+		pass
+
+	@abstractmethod
+	def visit_var_stmt(self, expr):
 		pass
 

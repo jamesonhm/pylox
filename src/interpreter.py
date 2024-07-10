@@ -3,12 +3,15 @@ from expr import (
     Expr,
     Grouping,
     Literal,
-    Unary
+    Unary,
+    Variable
 )
+from environment import Environment
 from stmt import (
     Stmt,
     Expression,
-    Print
+    Print,
+    Var
 )
 
 from token import Token
@@ -20,8 +23,9 @@ from visitor import Visitor
 
 class Interpreter(Visitor):
 
-    def __init__(self, error_handler: ErrorHandler):
-        self.error_handler = error_handler
+    def __init__(self):
+        self.error_handler = ErrorHandler()
+        self.environment = Environment()
 
     def interpret(self, statements: list[Stmt]):
         try:
@@ -43,6 +47,13 @@ class Interpreter(Visitor):
     def visit_print_stmt(self, stmt: Print):
         value = self._evaluate(stmt.expression)
         print(self._stringify(value))
+        return None
+
+    def visit_var_stmt(self, stmt: Var):
+        value = None
+        if stmt.initializer != None:
+            value = self._evaluate(stmt.initializer)
+        self.environment.define(stmt.name.lexeme, value)
         return None
 
     def visit_binary_expr(self, expr: Binary):
@@ -103,6 +114,9 @@ class Interpreter(Visitor):
             return not self._is_truthy(right)
 
         # return None
+
+    def visit_variable_expr(self, expr: Variable):
+        return self.environment.get(expr.name)
 
     def _check_numeric_oper(self, operator: Token, right: Expr):
         if isinstance(right, (float, int)):
