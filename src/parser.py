@@ -2,7 +2,7 @@
 from token import Token
 
 from expr import Binary, Expr, Grouping, Literal, Unary, Variable, Assign
-from stmt import Expression, Print, Stmt, Var
+from stmt import Block, Expression, Print, Stmt, Var
 from tokentype import TokenType
 from error_handler import ErrorHandler
 
@@ -20,7 +20,9 @@ class Parser:
     def parse(self) -> list[Stmt]:
         statements = []
         while not self._is_at_end():
-            statements.append(self._declaration())
+            decl = self._declaration()
+            # print(f"declaration return: {decl}")
+            statements.append(decl)
         return statements
 
     def _expression(self) -> Expr:
@@ -38,6 +40,8 @@ class Parser:
     def _statement(self) -> Stmt:
         if self._match(TokenType.PRINT):
             return self._print_statement()
+        if self._match(TokenType.LEFT_BRACE):
+            return Block(self._block())
         return self._expression_statement()
 
     def _print_statement(self) -> Stmt:
@@ -50,6 +54,7 @@ class Parser:
         initializer = None
         if self._match(TokenType.EQUAL):
             initializer = self._expression()
+            # print(f"initializer: {initializer}")
 
         self._consume(TokenType.SEMICOLON,"Expect ';' after variable declaration.")
         return Var(name, initializer)
@@ -58,6 +63,14 @@ class Parser:
         expr = self._expression()
         self._consume(TokenType.SEMICOLON, "Expect ';' after expression.")
         return  Expression(expr)
+
+    def _block(self) -> list[Stmt]:
+        statements = []
+        while not self._check(TokenType.RIGHT_BRACE) and not self._is_at_end():
+            statements.append(self._declaration())
+
+        self._consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
+        return statements
 
     def _assignment(self) -> Expr:
         expr = self._equality()
@@ -72,7 +85,7 @@ class Parser:
             
             self.error_handler.token_error(equals, "Invalid assignment target.")
 
-            return expr
+        return expr
 
     def _equality(self) -> Expr:
         expr = self._comparison()
@@ -131,6 +144,7 @@ class Parser:
             return Literal(None)
         
         if self._match(TokenType.NUMBER, TokenType.STRING):
+            # print(f"got to the string match: {self._previous()}")
             return Literal(self._previous().literal)
         if self._match(TokenType.IDENTIFIER):
             return Variable(self._previous())

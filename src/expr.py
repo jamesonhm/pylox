@@ -4,6 +4,10 @@ from token import Token
 from visitor import Visitor
 
 class Expr(ABC):
+
+	def __repr__(self):
+		return (type(self).__name__) + str(self.__dict__)
+
 	@abstractmethod
 	def accept(self, visitor: Visitor):
 		pass

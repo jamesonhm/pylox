@@ -17,6 +17,7 @@ def main():
     ]
     
     stmt_types = [
+        {"Block": ["statements: list[Stmt]"]},
         {"Expression": ["expression: Expr"]},
         {"Print": ["expression: Expr"]},
         {"Var": ["name: Token", "initializer: Expr"]}
@@ -38,6 +39,10 @@ def define_ast(output_dir: str, base_name: str, types: list[dict[str, list[str]]
             lines += ["from expr import Expr\n"]
         lines += ["\n",
                   f"class {base_name}(ABC):\n",
+                  "\n",
+                  f"\tdef __repr__(self):\n",
+                  f"\t\treturn (type(self).__name__) + str(self.__dict__)\n",
+                  "\n"
                   "\t@abstractmethod\n",
                   f"\tdef accept(self, visitor: Visitor):\n",
                   "\t\tpass\n\n"]

@@ -38,6 +38,7 @@ class Scanner:
             self._scan_token()
 
         self._tokens.append(Token(TokenType.EOF, "", None, self._line))
+        # print(f"Tokens:: {str(self._tokens)}")
         return self._tokens
 
     def _scan_token(self):

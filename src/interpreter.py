@@ -9,6 +9,7 @@ from expr import (
 )
 from environment import Environment
 from stmt import (
+    Block,
     Stmt,
     Expression,
     Print,
@@ -31,6 +32,7 @@ class Interpreter(Visitor):
     def interpret(self, statements: list[Stmt]):
         try:
             for statement in statements:
+                # print(f"executing statement {statement}")
                 self._execute(statement)
         except LoxRuntimeError as e:
             self.error_handler.runtime_error(e)
@@ -41,11 +43,27 @@ class Interpreter(Visitor):
     def _execute(self, stmt):
         stmt.accept(self)
 
+    def _execute_block(self, statements: list[Stmt], environment: Environment):
+        previous = self.environment
+        try:
+            self.environment = environment
+            
+            for statement in statements:
+                # print(f"statement: {statement}")
+                self._execute(statement)
+        finally:
+            self.environment = previous
+
+    def visit_block_stmt(self, stmt: Block):
+        self._execute_block(stmt.statements, Environment(self.environment))
+        return None
+
     def visit_expression_stmt(self, stmt: Expression):
         self._evaluate(stmt.expression)
         return None
 
     def visit_print_stmt(self, stmt: Print):
+        # print(f"statement: {stmt} | expression: {stmt.expression}")
         value = self._evaluate(stmt.expression)
         print(self._stringify(value))
         return None

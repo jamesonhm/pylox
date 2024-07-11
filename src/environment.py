@@ -17,10 +17,17 @@ class Environment:
     def get(self, name: Token):
         if name.lexeme in self.values.keys():
             return self.values[name.lexeme]
+        if self.enclosing is not None:
+            return self.enclosing.get(name)
+
         raise LoxRuntimeError(name, f"Undefined variable '{name.lexeme}'.")
 
     def assign(self, name: Token, value: Any):
         if name.lexeme in self.values.keys():
             self.values[name.lexeme] = value
             return
+        if self.enclosing is not None:
+            self.enclosing.assign(name, value)
+            return
+
         raise LoxRuntimeError(name, f"Undefined variable '{name.lexeme}'.")
