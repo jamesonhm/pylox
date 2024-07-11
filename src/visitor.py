@@ -3,6 +3,10 @@ from abc import ABC, abstractmethod
 class Visitor(ABC):
 
 	@abstractmethod
+	def visit_assign_expr(self, expr):
+		pass
+
+	@abstractmethod
 	def visit_binary_expr(self, expr):
 		pass
 

@@ -8,6 +8,14 @@ class Expr(ABC):
 	def accept(self, visitor: Visitor):
 		pass
 
+class Assign(Expr):
+	def __init__(self, name: Token, value: Expr):
+		self.name = name
+		self.value = value
+
+	def accept(self, visitor: Visitor):
+		return visitor.visit_assign_expr(self)
+
 class Binary(Expr):
 	def __init__(self, left: Expr, operator: Token, right: Expr):
 		self.left = left

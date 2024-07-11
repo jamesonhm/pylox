@@ -1,7 +1,7 @@
 
 from token import Token
 
-from expr import Binary, Expr, Grouping, Literal, Unary, Variable
+from expr import Binary, Expr, Grouping, Literal, Unary, Variable, Assign
 from stmt import Expression, Print, Stmt, Var
 from tokentype import TokenType
 from error_handler import ErrorHandler
@@ -24,7 +24,7 @@ class Parser:
         return statements
 
     def _expression(self) -> Expr:
-        return self._equality()
+        return self._assignment()
 
     def _declaration(self) -> Stmt | None:
         try:
@@ -58,6 +58,21 @@ class Parser:
         expr = self._expression()
         self._consume(TokenType.SEMICOLON, "Expect ';' after expression.")
         return  Expression(expr)
+
+    def _assignment(self) -> Expr:
+        expr = self._equality()
+
+        if self._match(TokenType.EQUAL):
+            equals = self._previous()
+            value = self._assignment()
+
+            if isinstance(expr, Variable):
+                name = expr.name
+                return Assign(name, value)
+            
+            self.error_handler.token_error(equals, "Invalid assignment target.")
+
+            return expr
 
     def _equality(self) -> Expr:
         expr = self._comparison()

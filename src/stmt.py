@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any
 from token import Token
 from visitor import Visitor
 from expr import Expr
