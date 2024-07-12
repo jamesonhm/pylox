@@ -12,6 +12,7 @@ def main():
         {"Binary": ["left: Expr", "operator: Token", "right: Expr"]},
         {"Grouping": ["expression: Expr"]},
         {"Literal": ["value: Any"]},
+        {"Logical": ["left: Expr", "operator: Token", "right: Expr"]},
         {"Unary": ["operator: Token", "right: Expr"]},
         {"Variable": ["name: Token"]}
     ]
@@ -19,8 +20,10 @@ def main():
     stmt_types = [
         {"Block": ["statements: list[Stmt]"]},
         {"Expression": ["expression: Expr"]},
+        {"If": ["condition: Expr", "then_branch: Stmt", "else_branch: Stmt"]},
         {"Print": ["expression: Expr"]},
-        {"Var": ["name: Token", "initializer: Expr"]}
+        {"Var": ["name: Token", "initializer: Expr"]},
+        {"While": ["condition: Expr", "body: Stmt"]}
     ]
     base_types = list(zip(["Expr", "Stmt"], [expr_types, stmt_types]))
 

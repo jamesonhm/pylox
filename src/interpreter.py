@@ -5,15 +5,18 @@ from expr import (
     Grouping,
     Literal,
     Unary,
-    Variable
+    Variable,
+    Logical
 )
 from environment import Environment
 from stmt import (
     Block,
+    If,
     Stmt,
     Expression,
     Print,
-    Var
+    Var,
+    While
 )
 
 from token import Token
@@ -62,6 +65,13 @@ class Interpreter(Visitor):
         self._evaluate(stmt.expression)
         return None
 
+    def visit_if_stmt(self, stmt: If):
+        if self._is_truthy(self._evaluate(stmt.condition)):
+            self._execute(stmt.then_branch)
+        elif stmt.else_branch is not None:
+            self._execute(stmt.else_branch)
+        return None
+
     def visit_print_stmt(self, stmt: Print):
         # print(f"statement: {stmt} | expression: {stmt.expression}")
         value = self._evaluate(stmt.expression)
@@ -73,6 +83,11 @@ class Interpreter(Visitor):
         if stmt.initializer != None:
             value = self._evaluate(stmt.initializer)
         self.environment.define(stmt.name.lexeme, value)
+        return None
+
+    def visit_while_stmt(self, stmt: While):
+        while self._is_truthy(self._evaluate(stmt.condition)):
+            self._execute(stmt.body)
         return None
 
     def visit_assign_expr(self, expr: Assign):
@@ -127,6 +142,18 @@ class Interpreter(Visitor):
 
     def visit_literal_expr(self, expr: Literal):
         return expr.value
+
+    def visit_logical_expr(self, expr: Logical):
+        left = self._evaluate(expr.left)
+
+        if expr.operator.type == TokenType.OR:
+            if self._is_truthy(left):
+                return left
+            else:
+                if not self._is_truthy(left):
+                    return left
+        
+        return self._evaluate(expr.right)
 
     def visit_unary_expr(self, expr: Unary):
         right = self._evaluate(expr.right)

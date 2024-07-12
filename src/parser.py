@@ -1,8 +1,8 @@
 
 from token import Token
 
-from expr import Binary, Expr, Grouping, Literal, Unary, Variable, Assign
-from stmt import Block, Expression, Print, Stmt, Var
+from expr import Binary, Expr, Grouping, Literal, Unary, Variable, Assign, Logical
+from stmt import Block, Expression, If, Print, Stmt, Var, While
 from tokentype import TokenType
 from error_handler import ErrorHandler
 
@@ -38,11 +38,27 @@ class Parser:
             return None
 
     def _statement(self) -> Stmt:
+        if self._match(TokenType.IF):
+            return self._if_statement()
         if self._match(TokenType.PRINT):
             return self._print_statement()
+        if self._match(TokenType.WHILE):
+            return self._while_statement()
         if self._match(TokenType.LEFT_BRACE):
             return Block(self._block())
         return self._expression_statement()
+
+    def _if_statement(self) -> Stmt:
+        self._consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
+        condition = self._expression()
+        self._consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.")
+
+        then_branch = self._statement()
+        else_branch = None
+        if self._match(TokenType.ELSE):
+            else_branch = self._statement()
+
+        return If(condition, then_branch, else_branch)
 
     def _print_statement(self) -> Stmt:
         value = self._expression()
@@ -59,6 +75,14 @@ class Parser:
         self._consume(TokenType.SEMICOLON,"Expect ';' after variable declaration.")
         return Var(name, initializer)
 
+    def _while_statement(self) -> Stmt:
+        self._consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
+        condition = self._expression()
+        self._consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.")
+        body = self._statement()
+
+        return While(condition, body)
+
     def _expression_statement(self) -> Stmt:
         expr = self._expression()
         self._consume(TokenType.SEMICOLON, "Expect ';' after expression.")
@@ -73,7 +97,7 @@ class Parser:
         return statements
 
     def _assignment(self) -> Expr:
-        expr = self._equality()
+        expr = self._or()
 
         if self._match(TokenType.EQUAL):
             equals = self._previous()
@@ -84,6 +108,26 @@ class Parser:
                 return Assign(name, value)
             
             self.error_handler.token_error(equals, "Invalid assignment target.")
+
+        return expr
+
+    def _or(self) -> Expr:
+        expr = self._and()
+
+        while self._match(TokenType.OR):
+            operator = self._previous()
+            right = self._and()
+            expr = Logical(expr, operator, right)
+
+        return expr
+
+    def _and(self) -> Expr:
+        expr = self._equality()
+
+        while self._match(TokenType.AND):
+            operator = self._previous()
+            right = self._equality()
+            expr = Logical(expr, operator, right)
 
         return expr
 

@@ -19,6 +19,10 @@ class Visitor(ABC):
 		pass
 
 	@abstractmethod
+	def visit_logical_expr(self, expr):
+		pass
+
+	@abstractmethod
 	def visit_unary_expr(self, expr):
 		pass
 
@@ -35,10 +39,18 @@ class Visitor(ABC):
 		pass
 
 	@abstractmethod
+	def visit_if_stmt(self, expr):
+		pass
+
+	@abstractmethod
 	def visit_print_stmt(self, expr):
 		pass
 
 	@abstractmethod
 	def visit_var_stmt(self, expr):
+		pass
+
+	@abstractmethod
+	def visit_while_stmt(self, expr):
 		pass
 
