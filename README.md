@@ -8,7 +8,7 @@
 
 # Part II Tree Walk Interpreter
 
-## Chapter 4 Scanning
+## Scanning
 (Also know as Lexing or Tokenizing)
 
 ### Interpreter Framework
@@ -26,8 +26,28 @@ d. start of a string literal is id'd by a quote " or '
 e. start of numeric literal id'd by is_digit
 f. assume any lexeme starting with a letter or underscore is an identifier, then check it agains teh list of reserved/key words
 
+## Representing Code 
+* Context free grammar: uses an "alphabet" consisting of the tokens produced by the scanner and defines the set of strings possible with them.
+* rules comprised of a head and a body, the head is a single symbol, the body is what it generates
+* Symbols are either terminal, an individual token, or nonterminal, a reference to another rule 
+
+### Lox's Grammar
+expression  ->  literal
+                | unary
+                | binary
+                | grouping ;
+
+literal     ->  NUMBER | STRING | "true" | "false" | "nil" ;
+grouping    ->  "(" expression ")" ;
+unary       ->  ( "-" | "!" ) expression ;
+binary      ->  expression operator expression ;
+operator    ->  "==" | "!=" | "<" | "<=" | ">" | ">=" 
+                | "+" | "-" | "*" | "/" ;
+
+NUMBER: any number literal
+STRING: any string literal
 
 ### TODO:
-[ ] Error handling seems inconsistent
+[] Error handling seems inconsistent
 
 
