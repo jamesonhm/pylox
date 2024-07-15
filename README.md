@@ -39,16 +39,16 @@
 expression  ->  literal
                 | unary
                 | binary
-                | grouping ;
+                | grouping ;  
 
-literal     ->  NUMBER | STRING | "true" | "false" | "nil" ;
-grouping    ->  "(" expression ")" ;
-unary       ->  ( "-" | "!" ) expression ;
-binary      ->  expression operator expression ;
-operator    ->  "==" | "!=" | "<" | "<=" | ">" | ">=" 
-                | "+" | "-" | "*" | "/" ;
+literal     ->  NUMBER | STRING | "true" | "false" | "nil" ;  
+grouping    ->  "(" expression ")" ;  
+unary       ->  ( "-" | "!" ) expression ;  
+binary      ->  expression operator expression ;  
+operator    ->  "==" | "!=" | "<" | "<=" | ">" | ">="   
+                | "+" | "-" | "*" | "/" ;  
 
-NUMBER: any number literal
+NUMBER: any number literal  
 STRING: any string literal
 
 The grammar is recursive, forms a syntax tree.
