@@ -1,6 +1,7 @@
 from expr import (
     Assign,
     Binary,
+    Call,
     Expr,
     Grouping,
     Literal,
@@ -20,6 +21,7 @@ from stmt import (
 )
 
 from token import Token
+from lox_callable import LoxCallable
 from error_handler import ErrorHandler
 from tokentype import TokenType
 from runtime_error import LoxRuntimeError
@@ -136,6 +138,21 @@ class Interpreter(Visitor):
             return float(left) * float(right)
 
         # return None
+
+    def visit_call_expr(self, expr: Call):
+        function = self._evaluate(expr.callee)
+
+        if not isinstance(function, LoxCallable):
+            raise LoxRuntimeError(expr.paren, "Can only call functions and classes.")
+
+        arguments = []
+        for argument in expr.arguments:
+            arguments.append(self._evaluate(argument))
+
+        if len(arguments) != function.arity():
+            raise LoxRuntimeError(expr.paren, f"Expected {function.arity()} arguments but got {len(arguments)}.")
+
+        return function.call(self, arguments)
 
     def visit_grouping_expr(self, expr: Grouping):
         return self._evaluate(expr.expression)
