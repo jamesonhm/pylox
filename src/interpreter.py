@@ -20,6 +20,7 @@ from stmt import (
     While
 )
 
+from native import Clock
 from token import Token
 from lox_callable import LoxCallable
 from error_handler import ErrorHandler
@@ -32,7 +33,10 @@ class Interpreter(Visitor):
 
     def __init__(self):
         self.error_handler = ErrorHandler()
-        self.environment = Environment()
+        self.globals = Environment()
+        self.environment = self.globals
+
+        self.globals.define("clock", Clock())
 
     def interpret(self, statements: list[Stmt]):
         try:

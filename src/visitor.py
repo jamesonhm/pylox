@@ -43,6 +43,10 @@ class Visitor(ABC):
 		pass
 
 	@abstractmethod
+	def visit_function_stmt(self, expr):
+		pass
+
+	@abstractmethod
 	def visit_if_stmt(self, expr):
 		pass
 

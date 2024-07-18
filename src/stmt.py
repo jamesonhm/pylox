@@ -27,6 +27,15 @@ class Expression(Stmt):
 	def accept(self, visitor: Visitor):
 		return visitor.visit_expression_stmt(self)
 
+class Function(Stmt):
+	def __init__(self, name: Token, params: list[Token], body: list[Stmt]):
+		self.name = name
+		self.params = params
+		self.body = body
+
+	def accept(self, visitor: Visitor):
+		return visitor.visit_function_stmt(self)
+
 class If(Stmt):
 	def __init__(self, condition: Expr, then_branch: Stmt, else_branch: Stmt):
 		self.condition = condition

@@ -2,7 +2,7 @@
 from token import Token
 
 from expr import Binary, Expr, Grouping, Literal, Unary, Variable, Assign, Logical, Call
-from stmt import Block, Expression, If, Print, Stmt, Var, While
+from stmt import Block, Expression, If, Print, Stmt, Var, While, Function
 from tokentype import TokenType
 from error_handler import ErrorHandler
 
@@ -30,6 +30,8 @@ class Parser:
 
     def _declaration(self) -> Stmt | None:
         try:
+            if self._match(TokenType.FUN):
+                return self._function("function")
             if self._match(TokenType.VAR):
                 return self._var_declaration()
             return self._statement()
@@ -120,6 +122,22 @@ class Parser:
         expr = self._expression()
         self._consume(TokenType.SEMICOLON, "Expect ';' after expression.")
         return  Expression(expr)
+
+    def _function(self, kind: str) -> Function:
+        name = self._consume(TokenType.IDENTIFIER, f"Expect {kind} name.")
+        self._consume(TokenType.LEFT_PAREN, f"Expect '(' after {kind} name.")
+        parameters = []
+        if not self._check(TokenType.RIGHT_PAREN):
+            parameters.append(self._consume(TokenType.IDENTIFIER, "Expect parameter name."))
+            while self._match(TokenType.COMMA):
+                if len(parameters) >= 255:
+                    self.error_handler.token_error(self._peek(), "Can't have more than 255 parameters.")
+                parameters.append(self._consume(TokenType.IDENTIFIER, "Expect parameter name."))
+        self._consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
+
+        self._consume(TokenType.LEFT_BRACE, f"Expect '{{' before {kind} body.")
+        body = self._block()
+        return Function(name, parameters, body)
 
     def _block(self) -> list[Stmt]:
         statements = []
