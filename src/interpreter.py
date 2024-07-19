@@ -9,9 +9,9 @@ from expr import (
     Variable,
     Logical
 )
-from environment import Environment
 from stmt import (
     Block,
+    Function,
     If,
     Stmt,
     Expression,
@@ -20,6 +20,8 @@ from stmt import (
     While
 )
 
+from environment import Environment
+from lox_function import LoxFunction
 from native import Clock
 from token import Token
 from lox_callable import LoxCallable
@@ -69,6 +71,11 @@ class Interpreter(Visitor):
 
     def visit_expression_stmt(self, stmt: Expression):
         self._evaluate(stmt.expression)
+        return None
+
+    def visit_function_stmt(self, stmt: Function):
+        function = LoxFunction(stmt)
+        self.environment.define(stmt.name.lexeme, function)
         return None
 
     def visit_if_stmt(self, stmt: If):

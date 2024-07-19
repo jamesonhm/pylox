@@ -1,7 +1,7 @@
 var a = 0;
 var temp;
 
-var t1 = clock;
+var t1 = clock();
 print t1;
 
 for (var b = 1; a < 10000; b = temp + b) {
@@ -9,5 +9,4 @@ for (var b = 1; a < 10000; b = temp + b) {
     temp = a;
     a = b;
 }
-print clock();
-
+print clock() - t1;
