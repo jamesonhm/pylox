@@ -55,6 +55,10 @@ class Visitor(ABC):
 		pass
 
 	@abstractmethod
+	def visit_return_stmt(self, expr):
+		pass
+
+	@abstractmethod
 	def visit_var_stmt(self, expr):
 		pass
 

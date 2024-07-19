@@ -13,6 +13,7 @@ from stmt import (
     Block,
     Function,
     If,
+    Return,
     Stmt,
     Expression,
     Print,
@@ -28,6 +29,7 @@ from lox_callable import LoxCallable
 from error_handler import ErrorHandler
 from tokentype import TokenType
 from runtime_error import LoxRuntimeError
+from return_exception import LoxReturnException
 from visitor import Visitor
 
 
@@ -90,6 +92,13 @@ class Interpreter(Visitor):
         value = self._evaluate(stmt.expression)
         print(self._stringify(value))
         return None
+
+    def visit_return_stmt(self, stmt:Return):
+        value = None
+        if stmt.value != None:
+            value = self._evaluate(stmt.value)
+        
+        raise LoxReturnException(value)
 
     def visit_var_stmt(self, stmt: Var):
         value = None

@@ -2,7 +2,7 @@
 from token import Token
 
 from expr import Binary, Expr, Grouping, Literal, Unary, Variable, Assign, Logical, Call
-from stmt import Block, Expression, If, Print, Stmt, Var, While, Function
+from stmt import Block, Expression, If, Print, Stmt, Var, While, Function, Return
 from tokentype import TokenType
 from error_handler import ErrorHandler
 
@@ -46,6 +46,8 @@ class Parser:
             return self._if_statement()
         if self._match(TokenType.PRINT):
             return self._print_statement()
+        if self._match(TokenType.RETURN):
+            return self._return_statement()
         if self._match(TokenType.WHILE):
             return self._while_statement()
         if self._match(TokenType.LEFT_BRACE):
@@ -99,6 +101,15 @@ class Parser:
         value = self._expression()
         self._consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return Print(value)
+
+    def _return_statement(self) -> Stmt:
+        keyword = self._previous()
+        value = None
+        if not self._check(TokenType.SEMICOLON):
+            value = self._expression()
+
+        self._consume(TokenType.SEMICOLON, "Expect ';' after return value.")
+        return Return(keyword, value)
 
     def _var_declaration(self) -> Stmt:
         name = self._consume(TokenType.IDENTIFIER, "Expect variable name.")
