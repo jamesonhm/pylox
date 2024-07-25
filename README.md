@@ -101,17 +101,19 @@ Convert a sequence of tokens into the syntax tree.
 Associativity from lowest to Highest precedence.  
 
 | Name | Operators | Associates | 
-| Equality | == != | Left |
-| Comparison | > >= < <= | Left |
-| Term | - + | Left |
-| Factor | / * | Left |
-| Unary | ! - | Right |
+| --- | --- | --- |
+| Equality | == != | Left | 
+| Comparison | > >= < <= | Left | 
+| Term | - + | Left | 
+| Factor | / * | Left | 
+| Unary | ! - | Right | 
 
 ### Recursive Descent Parsing  
 Top down parser - starts from the top or outermostgrammar rule (expression).  It is a literal translation of grammar rules into imperative code. Recursive when a rule refers to itself, directly or indirectly.  
 
 Each method for parsing a grammar rule produces a syntax tree for that rule and returns it to the caller.  Each non-terminal in the rule results in a call to that rules' method.  
 
+| --- | --- | --- |
 | Top | Equality | Lower |
 | ^ | Comparison | ^ |
 | Grammar | Addition | Precedence |
