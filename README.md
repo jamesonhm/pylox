@@ -36,17 +36,13 @@
 
 ### Lox's Grammar
 
-expression  ->  literal
-                | unary
-                | binary
-                | grouping ;  
-
-literal     ->  NUMBER | STRING | "true" | "false" | "nil" ;  
-grouping    ->  "(" expression ")" ;  
-unary       ->  ( "-" | "!" ) expression ;  
-binary      ->  expression operator expression ;  
-operator    ->  "==" | "!=" | "<" | "<=" | ">" | ">="   
-                | "+" | "-" | "*" | "/" ;  
+expression  -> equality;  
+equality    -> comparison ( ( "!=" | "==" ) comparison )* ;  
+comparison  -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;  
+term        -> factor ( ( "-" | "+" ) factor )* ;  
+factor      -> unary ( ( "/" | "*" ) unary )* ;  
+unary       ->  ( "-" | "!" ) unary ;  
+primary     ->  NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" ;  
 
 NUMBER: any number literal  
 STRING: any string literal
@@ -99,6 +95,28 @@ To perform the operation,
 ## Parsing
 
 Convert a sequence of tokens into the syntax tree.  
+- Precedence: which operator evaluated first in expression containing a mix of opers. Define a separate rule in the grammar for each precedence level. each rule only matches expr's at it's precedence level or higher.  e.g. `unary` will match `!negated` or primary like `1234`.  `term` can match `1 + 2` but also `3 * 4 / 5`  
+- Associativity: which operator evaluated first in series of the same oper.  
+
+Associativity from lowest to Highest precedence.  
+
+| Name | Operators | Associates | 
+| Equality | == != | Left |
+| Comparison | > >= < <= | Left |
+| Term | - + | Left |
+| Factor | / * | Left |
+| Unary | ! - | Right |
+
+### Recursive Descent Parsing  
+Top down parser - starts from the top or outermostgrammar rule (expression).  It is a literal translation of grammar rules into imperative code. Recursive when a rule refers to itself, directly or indirectly.  
+
+Each method for parsing a grammar rule produces a syntax tree for that rule and returns it to the caller.  Each non-terminal in the rule results in a call to that rules' method.  
+
+| Top | Equality | Lower |
+| ^ | Comparison | ^ |
+| Grammar | Addition | Precedence |
+| v | Multiplication | v |
+| Bottom | Unary | Higher |
 
 ### TODO:
 [] Error handling seems inconsistent
