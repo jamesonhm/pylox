@@ -113,6 +113,7 @@ Top down parser - starts from the top or outermostgrammar rule (expression).  It
 
 Each method for parsing a grammar rule produces a syntax tree for that rule and returns it to the caller.  Each non-terminal in the rule results in a call to that rules' method.  
 
+|  |  |  |
 | --- | --- | --- |
 | Top | Equality | Lower |
 | ^ | Comparison | ^ |
