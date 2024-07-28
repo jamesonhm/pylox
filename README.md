@@ -109,7 +109,7 @@ Associativity from lowest to Highest precedence.
 | Unary | ! - | Right | 
 
 ### Recursive Descent Parsing  
-Top down parser - starts from the top or outermostgrammar rule (expression).  It is a literal translation of grammar rules into imperative code. Recursive when a rule refers to itself, directly or indirectly.  
+Top down parser - starts from the top or outermost grammar rule (expression).  It is a literal translation of grammar rules into imperative code. Recursive when a rule refers to itself, directly or indirectly.  
 
 Each method for parsing a grammar rule produces a syntax tree for that rule and returns it to the caller.  Each non-terminal in the rule results in a call to that rules' method.  
 
@@ -120,6 +120,25 @@ Each method for parsing a grammar rule produces a syntax tree for that rule and 
 | Grammar | Addition | Precedence |
 | v | Multiplication | v |
 | Bottom | Unary | Higher |
+
+Notable Helper Methods:
+- match(token_types): check to see if the current token has any of the given types.  If yes, consumes it and returns True, if no, return false and leaves the current token.  
+- check(token_type): return true if the current token is the given type.  Does not consume, only looks.  
+- advance(): consumes the current token and returns it.  
+- consume(token_type, error_msg): when the parser knows by syntax what token shoudl come next, it can consume it directly or error if it is not there.  
+
+### Syntax Errors
+- Given an invalid sequence of tokens, detect the errors and tell the user about the mistake.  
+- Modern IDE's and editors are constantly reparsing code to syntax highlight and detect errors.  
+- Avoid crashing or hanging, even while parsing incorrect code.  
+- Be fast.  
+- Report as many distinct errors as there are.  
+- Minimize cascade errors, errors caused by the parser losing it's place from bad input.  
+
+#### Panic Mode Error Recovery
+One token does not make sense given it's current state in grammar production.  Synchronization aligns the forthcoming tokens and it's state such that the next token does not match the current rule being parsed.  Parser jumps out of current nested production to get to a grammar rule synchronization point, typically between statements.  Discards tokens until in the stream until it reaches one that can appear at that point in the rule.  This avoids cascade errors.  
+
+
 
 ### TODO:
 [] Error handling seems inconsistent
