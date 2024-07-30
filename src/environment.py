@@ -1,4 +1,5 @@
 from __future__ import annotations
+from os import walk
 
 from typing import Any, Dict, Optional
 
@@ -13,6 +14,18 @@ class Environment:
 
     def define(self, name: str, value: Any):
         self.values[name] = value
+
+    def ancestor(self, distance:int) -> Environment:
+        environment = self
+        for _ in range(distance):
+            environment = environment.enclosing
+        return environment
+
+    def get_at(self, distance: int, name: str):
+        return self.ancestor(distance).values.get(name)
+
+    def assign_at(self, distance: int, name: Token, value: Any):
+        self.ancestor(distance).values[name.lexeme] = value
 
     def get(self, name: Token):
         if name.lexeme in self.values.keys():

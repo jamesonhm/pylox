@@ -1,9 +1,30 @@
 from collections import deque
 from typing import Deque
-from expr import Expr, Variable
+from expr import (
+    Assign, 
+    Binary, 
+    Call, 
+    Expr, 
+    Grouping, 
+    Literal, 
+    Logical, 
+    Unary, 
+    Variable
+)
+from stmt import (
+    Block, 
+    Expression, 
+    Function, 
+    If, 
+    Print, 
+    Return, 
+    Stmt, 
+    Var, 
+    While
+)
+
 from interpreter import Interpreter
 from error_handler import ErrorHandler
-from stmt import Block, Stmt, Var
 from token import Token 
 from visitor import Visitor
 
@@ -28,6 +49,21 @@ class Resolver(Visitor):
     def _resolve_expression(self, expression: Expr):
         expression.accept(self)
 
+    def _resolve_local(self, expr: Expr, name: Token):
+        for i, scope in enumerate(list(reversed(self.scopes))):
+            if name.lexeme in scope:
+                self.interpreter.resolve(expr, i)
+                return
+        # if not found in any scopes, assume global and don't resolve
+
+    def _resolve_function(self, function: Function):
+        self._begin_scope()
+        for param in function.params:
+            self._declare(param)
+            self._define(param)
+        self.resolve(function.body)
+        self._end_scope()
+
     def _begin_scope(self):
         self.scopes.append({})
 
@@ -38,6 +74,8 @@ class Resolver(Visitor):
         if len(self.scopes) == 0:
             return
         scope = self.scopes[-1]
+        if name.lexeme in scope:
+            self.error_handler.token_error(name, "Already a variable with this name in scope.")
         scope[name.lexeme] = False
 
     def _define(self, name: Token):
@@ -52,11 +90,77 @@ class Resolver(Visitor):
         self._end_scope()
         return None
 
+    def visit_expression_stmt(self, stmt: Expression):
+        self._resolve_expression(stmt.expression)
+        return None
+
+    def visit_function_stmt(self, stmt: Function):
+        self._declare(stmt.name)
+        self._define(stmt.name)
+
+        self._resolve_function(stmt)
+        return None
+
+    def visit_if_stmt(self, stmt: If):
+        self._resolve_expression(stmt.condition)
+        self._resolve_statement(stmt.then_branch)
+        if stmt.else_branch is not None:
+            self._resolve_statement(stmt.else_branch)
+        return None
+
+    def visit_print_stmt(self, stmt: Print):
+        self._resolve_expression(stmt.expression)
+        return None
+
+    def visit_return_stmt(self, stmt: Return):
+        if stmt.value is not None:
+            self._resolve_expression(stmt.value)
+        return None
+
     def visit_var_stmt(self, stmt:Var):
         self._declare(stmt.name)
         if stmt.initializer != None:
             self._resolve_expression(stmt.initializer)
         self._define(stmt.name)
+        return None
+
+    def visit_while_stmt(self, stmt: While):
+        self._resolve_expression(stmt.condition)
+        self._resolve_statement(stmt.body)
+        return None
+
+    def visit_assign_expr(self, expr: Assign):
+        self._resolve_expression(expr.value)
+        self._resolve_local(expr, expr.name)
+        return None
+
+    def visit_binary_expr(self, expr: Binary):
+        self._resolve_expression(expr.left)
+        self._resolve_expression(expr.right)
+        return None
+
+    def visit_call_expr(self, expr: Call):
+        self._resolve_expression(expr.callee)
+
+        for argument in expr.arguments:
+            self._resolve_expression(argument)
+
+        return None
+
+    def visit_grouping_expr(self, expr: Grouping):
+        self._resolve_expression(expr.expression)
+        return None
+
+    def visit_literal_expr(self, expr: Literal):
+        return None
+
+    def visit_logical_expr(self, expr: Logical):
+        self._resolve_expression(expr.left)
+        self._resolve_expression(expr.right)
+        return None
+
+    def visit_unary_expr(self, expr: Unary):
+        self._resolve_expression(expr.right)
         return None
 
     def visit_variable_expr(self, expr: Variable):

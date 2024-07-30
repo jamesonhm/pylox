@@ -5,6 +5,7 @@ from error_handler import ErrorHandler
 from interpreter import Interpreter
 from parser import Parser
 from scanner import Scanner
+from resolver import Resolver
 
 
 class Lox:
@@ -36,11 +37,13 @@ class Lox:
         # print(f"Tokens from Scanner: {tokens}")
 
         parser = Parser(tokens, self.error_handler)
-
         statements = parser.parse()
         
         if self.error_handler.had_error:
             return
+
+        resolver = Resolver(self.interpreter, self.error_handler)
+        resolver.resolve(statements)
         
         self.interpreter.interpret(statements)
 
