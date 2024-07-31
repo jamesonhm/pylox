@@ -44,6 +44,9 @@ class Lox:
 
         resolver = Resolver(self.interpreter, self.error_handler)
         resolver.resolve(statements)
+
+        if self.error_handler.had_error:
+            return
         
         self.interpreter.interpret(statements)
 

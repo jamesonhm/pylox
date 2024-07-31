@@ -1,4 +1,5 @@
 from collections import deque
+from enum import Enum, auto
 from typing import Deque
 from expr import (
     Assign, 
@@ -28,13 +29,17 @@ from error_handler import ErrorHandler
 from token import Token 
 from visitor import Visitor
 
+class FunctionType(Enum):
+    NONE = auto()
+    FUNCTION = auto()
+
 
 class Resolver(Visitor):
     def __init__(self, interpreter: Interpreter, error_handler: ErrorHandler):
         self.interpreter = interpreter
         self.scopes: Deque = deque()
         self.error_handler = error_handler
-
+        self.current_function = FunctionType.NONE
 
     def resolve(self, statements: list[Stmt]):
         self._resolve_statements(statements)
@@ -56,13 +61,16 @@ class Resolver(Visitor):
                 return
         # if not found in any scopes, assume global and don't resolve
 
-    def _resolve_function(self, function: Function):
+    def _resolve_function(self, function: Function, func_type: FunctionType):
+        enclosing_function = self.current_function
+        self.current_function = func_type
         self._begin_scope()
         for param in function.params:
             self._declare(param)
             self._define(param)
         self.resolve(function.body)
         self._end_scope()
+        self.current_function = enclosing_function
 
     def _begin_scope(self):
         self.scopes.append({})
@@ -98,7 +106,7 @@ class Resolver(Visitor):
         self._declare(stmt.name)
         self._define(stmt.name)
 
-        self._resolve_function(stmt)
+        self._resolve_function(stmt, FunctionType.FUNCTION)
         return None
 
     def visit_if_stmt(self, stmt: If):
@@ -113,6 +121,8 @@ class Resolver(Visitor):
         return None
 
     def visit_return_stmt(self, stmt: Return):
+        if self.current_function == FunctionType.NONE:
+            self.error_handler.token_error(stmt.keyword, "Can't return from top-level code.")
         if stmt.value is not None:
             self._resolve_expression(stmt.value)
         return None
