@@ -10,7 +10,8 @@ from expr import (
     Literal, 
     Logical, 
     Unary, 
-    Variable
+    Variable,
+    Get
 )
 from stmt import (
     Block, 
@@ -21,7 +22,8 @@ from stmt import (
     Return, 
     Stmt, 
     Var, 
-    While
+    While,
+    Class
 )
 
 from interpreter import Interpreter
@@ -98,6 +100,11 @@ class Resolver(Visitor):
         self._end_scope()
         return None
 
+    def visit_class_stmt(self, stmt: Class):
+        self._declare(stmt.name)
+        self._define(stmt.name)
+        return None
+
     def visit_expression_stmt(self, stmt: Expression):
         self._resolve_expression(stmt.expression)
         return None
@@ -155,6 +162,10 @@ class Resolver(Visitor):
         for argument in expr.arguments:
             self._resolve_expression(argument)
 
+        return None
+
+    def visit_get_expr(self, expr: Get):
+        self.resolve(expr.obj)
         return None
 
     def visit_grouping_expr(self, expr: Grouping):

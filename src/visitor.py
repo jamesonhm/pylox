@@ -15,6 +15,10 @@ class Visitor(ABC):
 		pass
 
 	@abstractmethod
+	def visit_get_expr(self, expr):
+		pass
+
+	@abstractmethod
 	def visit_grouping_expr(self, expr):
 		pass
 
@@ -36,6 +40,10 @@ class Visitor(ABC):
 
 	@abstractmethod
 	def visit_block_stmt(self, expr):
+		pass
+
+	@abstractmethod
+	def visit_class_stmt(self, expr):
 		pass
 
 	@abstractmethod

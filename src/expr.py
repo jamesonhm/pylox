@@ -1,3 +1,4 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any
 from token import Token
@@ -37,6 +38,14 @@ class Call(Expr):
 
 	def accept(self, visitor: Visitor):
 		return visitor.visit_call_expr(self)
+
+class Get(Expr):
+	def __init__(self, obj: Expr, name: Token):
+		self.obj = obj
+		self.name = name
+
+	def accept(self, visitor: Visitor):
+		return visitor.visit_get_expr(self)
 
 class Grouping(Expr):
 	def __init__(self, expression: Expr):

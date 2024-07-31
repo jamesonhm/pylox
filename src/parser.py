@@ -1,8 +1,8 @@
 
 from token import Token
 
-from expr import Binary, Expr, Grouping, Literal, Unary, Variable, Assign, Logical, Call
-from stmt import Block, Expression, If, Print, Stmt, Var, While, Function, Return
+from expr import Binary, Expr, Grouping, Literal, Unary, Variable, Assign, Logical, Call, Get
+from stmt import Block, Expression, If, Print, Stmt, Var, While, Function, Return, Class 
 from tokentype import TokenType
 from error_handler import ErrorHandler
 
@@ -30,6 +30,8 @@ class Parser:
 
     def _declaration(self) -> Stmt | None:
         try:
+            if self._match(TokenType.CLASS):
+                return self._class_declaration()
             if self._match(TokenType.FUN):
                 return self._function("function")
             if self._match(TokenType.VAR):
@@ -38,6 +40,17 @@ class Parser:
         except ParseError:
             self._synchronize()
             return None
+
+    def _class_declaration(self) -> Stmt:
+        name = self._consume(TokenType.IDENTIFIER, "Expect class name.")
+        self._consume(TokenType.LEFT_BRACE, "Expect '{' before class body.")
+
+        methods = []
+        while not self._check(TokenType.RIGHT_BRACE) and not self._is_at_end():
+            methods.append(self._function("method"))
+
+        self._consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.")
+        return Class(name, methods)
 
     def _statement(self) -> Stmt:
         if self._match(TokenType.FOR):
@@ -247,6 +260,9 @@ class Parser:
         while True:
             if self._match(TokenType.LEFT_PAREN):
                 expr = self._finish_call(expr)
+            elif self._match(TokenType.DOT):
+                name = self._consume(TokenType.IDENTIFIER, "Expect property name after '.'.")
+                expr = Get(expr, name)
             else:
                 break
         return expr

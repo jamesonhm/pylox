@@ -7,8 +7,10 @@ from expr import (
     Literal,
     Unary,
     Variable,
-    Logical
+    Logical,
+    Get
 )
+from lox_instance import LoxInstance
 from stmt import (
     Block,
     Function,
@@ -18,10 +20,12 @@ from stmt import (
     Expression,
     Print,
     Var,
-    While
+    While,
+    Class
 )
 
 from environment import Environment
+from lox_class import LoxClass
 from lox_function import LoxFunction
 from native import Clock
 from token import Token
@@ -73,6 +77,12 @@ class Interpreter(Visitor):
 
     def visit_block_stmt(self, stmt: Block):
         self._execute_block(stmt.statements, Environment(self.environment))
+        return None
+
+    def visit_class_stmt(self, stmt: Class):
+        self.environment.define(stmt.name.lexeme, None)
+        klass = LoxClass(stmt.name.lexeme)
+        self.environment.assign(stmt.name, klass)
         return None
 
     def visit_expression_stmt(self, stmt: Expression):
@@ -181,6 +191,13 @@ class Interpreter(Visitor):
             raise LoxRuntimeError(expr.paren, f"Expected {function.arity()} arguments but got {len(arguments)}.")
 
         return function.call(self, arguments)
+
+    def visit_get_expr(self, expr: Get):
+        obj = self._evaluate(expr.obj)
+        if isinstance(obj, LoxInstance):
+            return obj.get(expr.name)
+
+        raise LoxRuntimeError(expr.name, "Only instances have properties.")
 
     def visit_grouping_expr(self, expr: Grouping):
         return self._evaluate(expr.expression)

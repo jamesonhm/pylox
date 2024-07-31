@@ -11,6 +11,7 @@ def main():
         {"Assign": ["name: Token", "value: Expr"]},
         {"Binary": ["left: Expr", "operator: Token", "right: Expr"]},
         {"Call": ["callee: Expr", "paren: Token", "arguments: list[Expr]"]},
+        {"Get": ["obj: Expr", "name: Token"]},
         {"Grouping": ["expression: Expr"]},
         {"Literal": ["value: Any"]},
         {"Logical": ["left: Expr", "operator: Token", "right: Expr"]},
@@ -20,6 +21,7 @@ def main():
     
     stmt_types = [
         {"Block": ["statements: list[Stmt]"]},
+        {"Class": ["name: Token", "methods: list[Function]"]},
         {"Expression": ["expression: Expr"]},
         {"Function": ["name: Token", "params: list[Token]", "body: list[Stmt]"]},
         {"If": ["condition: Expr", "then_branch: Stmt", "else_branch: Stmt"]},
@@ -37,7 +39,8 @@ def main():
 def define_ast(output_dir: str, base_name: str, types: list[dict[str, list[str]]]):
     path = f"{output_dir}/{base_name.lower()}.py"
     with open(path, "w", encoding="UTF-8") as writer:
-        lines = ["from abc import ABC, abstractmethod\n",
+        lines = ["from __future__ import annotations\n",
+                 "from abc import ABC, abstractmethod\n",
                  "from typing import Any\n",
                  "from token import Token\n",
                  "from visitor import Visitor\n"]
