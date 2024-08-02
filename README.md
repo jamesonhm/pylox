@@ -136,8 +136,36 @@ Notable Helper Methods:
 - Minimize cascade errors, errors caused by the parser losing it's place from bad input.  
 
 #### Panic Mode Error Recovery
-One token does not make sense given it's current state in grammar production.  Synchronization aligns the forthcoming tokens and it's state such that the next token does not match the current rule being parsed.  Parser jumps out of current nested production to get to a grammar rule synchronization point, typically between statements.  Discards tokens until in the stream until it reaches one that can appear at that point in the rule.  This avoids cascade errors.  
+One token does not make sense given it's current state in grammar production.  Synchronization aligns the forthcoming tokens and it's state such that the next token does not match the current rule being parsed.  Parser jumps out of current nested production to get to a grammar rule synchronization point, typically between statements.  Discards tokens in the stream until it reaches one that can appear at that point in the rule.  This avoids cascade errors.  
 
+## Evaluating Expressions
+Expressions evaluate to a value;  
+- what kind of values does the language produce?  
+- How do we organize the code?  
+
+Values are implemented in the language the interpreter is written in.  
+Interpreter uses the Visitor pattern, implements the Visitor interface.  
+Each syntax node evaluates its children first.  
+
+#### Literals
+Literals are almost values, they are syntax that produces a value.  Literals come from the parser domain, values are an Interpreter concept.  
+
+#### Parentheses
+Recursively evaluate the inner node expression.
+
+#### Unary
+Eval the operand expression, then apply the unary operator to the result.  
+Truthiness and Falsiness - out of all possible values, two sets - those which are truthy and the rest are falsey.  
+
+#### Binary
+Operand evaluation order matters, L to R here. 
+
+### Runtime Errors
+Errors found during interpretation - Value casts for operator restrictions.  Need to gracefully handle and report the error to the user. In the case of a REPL, the session should not crash, they should be able to continue with a new line.  
+
+Custom exception helps id the token where the error occured.  
+
+## Interpreter
 
 
 ### TODO:
