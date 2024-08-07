@@ -8,7 +8,8 @@ from expr import (
     Unary,
     Variable,
     Logical,
-    Get
+    Get,
+    Set
 )
 from lox_instance import LoxInstance
 from stmt import (
@@ -81,7 +82,11 @@ class Interpreter(Visitor):
 
     def visit_class_stmt(self, stmt: Class):
         self.environment.define(stmt.name.lexeme, None)
-        klass = LoxClass(stmt.name.lexeme)
+        methods = dict()
+        for method in stmt.methods:
+            function = LoxFunction(method, self.environment)
+            methods[method.name.lexeme] = function
+        klass = LoxClass(stmt.name.lexeme, methods)
         self.environment.assign(stmt.name, klass)
         return None
 
@@ -216,6 +221,16 @@ class Interpreter(Visitor):
                     return left
         
         return self._evaluate(expr.right)
+
+    def visit_set_expr(self, expr: Set):
+        obj = self._evaluate(expr.obj)
+
+        if not isinstance(obj, LoxInstance):
+            raise LoxRuntimeError(expr.name, "Only instances have fields.")
+
+        value = self._evaluate(expr.value)
+        obj.set(expr.name, value)
+        return value
 
     def visit_unary_expr(self, expr: Unary):
         right = self._evaluate(expr.right)

@@ -11,7 +11,8 @@ from expr import (
     Logical, 
     Unary, 
     Variable,
-    Get
+    Get,
+    Set
 )
 from stmt import (
     Block, 
@@ -34,6 +35,7 @@ from visitor import Visitor
 class FunctionType(Enum):
     NONE = auto()
     FUNCTION = auto()
+    METHOD = auto()
 
 
 class Resolver(Visitor):
@@ -103,6 +105,10 @@ class Resolver(Visitor):
     def visit_class_stmt(self, stmt: Class):
         self._declare(stmt.name)
         self._define(stmt.name)
+
+        for method in stmt.methods:
+            declaration = FunctionType.METHOD 
+            self._resolve_function(method, declaration)
         return None
 
     def visit_expression_stmt(self, stmt: Expression):
@@ -165,7 +171,7 @@ class Resolver(Visitor):
         return None
 
     def visit_get_expr(self, expr: Get):
-        self.resolve(expr.obj)
+        self._resolve_expression(expr.obj)
         return None
 
     def visit_grouping_expr(self, expr: Grouping):
@@ -179,6 +185,10 @@ class Resolver(Visitor):
         self._resolve_expression(expr.left)
         self._resolve_expression(expr.right)
         return None
+
+    def visit_set_expr(self, expr: Set):
+        self._resolve_expression(expr.value)
+        self._resolve_expression(expr.obj)
 
     def visit_unary_expr(self, expr: Unary):
         self._resolve_expression(expr.right)

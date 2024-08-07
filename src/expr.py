@@ -70,6 +70,15 @@ class Logical(Expr):
 	def accept(self, visitor: Visitor):
 		return visitor.visit_logical_expr(self)
 
+class Set(Expr):
+	def __init__(self, obj: Expr, name: Token, value: Expr):
+		self.obj = obj
+		self.name = name
+		self.value = value
+
+	def accept(self, visitor: Visitor):
+		return visitor.visit_set_expr(self)
+
 class Unary(Expr):
 	def __init__(self, operator: Token, right: Expr):
 		self.operator = operator

@@ -1,7 +1,7 @@
 
 from token import Token
 
-from expr import Binary, Expr, Grouping, Literal, Unary, Variable, Assign, Logical, Call, Get
+from expr import Binary, Expr, Grouping, Literal, Unary, Variable, Assign, Logical, Call, Get, Set
 from stmt import Block, Expression, If, Print, Stmt, Var, While, Function, Return, Class 
 from tokentype import TokenType
 from error_handler import ErrorHandler
@@ -181,6 +181,8 @@ class Parser:
             if isinstance(expr, Variable):
                 name = expr.name
                 return Assign(name, value)
+            elif isinstance(expr, Get):
+                return Set(expr.obj, expr.name, value)
             
             self.error_handler.token_error(equals, "Invalid assignment target.")
 

@@ -31,6 +31,10 @@ class Visitor(ABC):
 		pass
 
 	@abstractmethod
+	def visit_set_expr(self, expr):
+		pass
+
+	@abstractmethod
 	def visit_unary_expr(self, expr):
 		pass
 

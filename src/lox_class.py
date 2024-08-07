@@ -5,8 +5,9 @@ from lox_instance import LoxInstance
 
 
 class LoxClass(LoxCallable):
-    def __init__(self, name: str):
+    def __init__(self, name: str, methods: dict):
         self.name = name
+        self.methods = methods
 
     def __str__(self):
         return self.name
@@ -18,3 +19,7 @@ class LoxClass(LoxCallable):
     def arity(self) -> int:
         return 0
 
+    def find_method(self, name: str):
+        if name in self.methods.keys():
+            return self.methods[name]
+        return None
