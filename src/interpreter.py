@@ -9,7 +9,8 @@ from expr import (
     Variable,
     Logical,
     Get,
-    Set
+    Set,
+    This
 )
 from lox_instance import LoxInstance
 from stmt import (
@@ -231,6 +232,9 @@ class Interpreter(Visitor):
         value = self._evaluate(expr.value)
         obj.set(expr.name, value)
         return value
+
+    def visit_this_expr(self, expr: This):
+        return self._lookup_variable(expr.keyword, expr)
 
     def visit_unary_expr(self, expr: Unary):
         right = self._evaluate(expr.right)

@@ -1,7 +1,7 @@
 
 from token import Token
 
-from expr import Binary, Expr, Grouping, Literal, Unary, Variable, Assign, Logical, Call, Get, Set
+from expr import Binary, Expr, Grouping, Literal, Unary, Variable, Assign, Logical, Call, Get, Set, This
 from stmt import Block, Expression, If, Print, Stmt, Var, While, Function, Return, Class 
 from tokentype import TokenType
 from error_handler import ErrorHandler
@@ -293,6 +293,8 @@ class Parser:
         if self._match(TokenType.NUMBER, TokenType.STRING):
             # print(f"got to the string match: {self._previous()}")
             return Literal(self._previous().literal)
+        if self._match(TokenType.THIS):
+            return This(self._previous())
         if self._match(TokenType.IDENTIFIER):
             return Variable(self._previous())
         if self._match(TokenType.LEFT_PAREN):

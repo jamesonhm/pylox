@@ -12,7 +12,8 @@ from expr import (
     Unary, 
     Variable,
     Get,
-    Set
+    Set,
+    This
 )
 from stmt import (
     Block, 
@@ -106,9 +107,14 @@ class Resolver(Visitor):
         self._declare(stmt.name)
         self._define(stmt.name)
 
+        self._begin_scope()
+        self.scopes[-1]["this"] = True
+
         for method in stmt.methods:
             declaration = FunctionType.METHOD 
             self._resolve_function(method, declaration)
+
+        self._end_scope()
         return None
 
     def visit_expression_stmt(self, stmt: Expression):
@@ -189,6 +195,10 @@ class Resolver(Visitor):
     def visit_set_expr(self, expr: Set):
         self._resolve_expression(expr.value)
         self._resolve_expression(expr.obj)
+
+    def visit_this_expr(self, expr: This):
+        self._resolve_local(expr, expr.keyword)
+        return None
 
     def visit_unary_expr(self, expr: Unary):
         self._resolve_expression(expr.right)
