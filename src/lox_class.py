@@ -2,6 +2,7 @@
 from typing import Any
 from lox_callable import LoxCallable
 from lox_instance import LoxInstance
+from lox_function import LoxFunction
 
 
 class LoxClass(LoxCallable):
@@ -14,10 +15,17 @@ class LoxClass(LoxCallable):
 
     def call(self, interpreter, arguments: list[Any]):
         instance = LoxInstance(self)
+        initializer: LoxFunction = self.find_method("init")
+        if initializer is not None:
+            initializer.bind(instance).call(interpreter, arguments)
+
         return instance
 
     def arity(self) -> int:
-        return 0
+        initializer: LoxFunction = self.find_method("init")
+        if initializer is None:
+            return 0
+        return initializer.arity()
 
     def find_method(self, name: str):
         if name in self.methods.keys():

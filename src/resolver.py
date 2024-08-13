@@ -36,7 +36,12 @@ from visitor import Visitor
 class FunctionType(Enum):
     NONE = auto()
     FUNCTION = auto()
+    INITIALIZER = auto()
     METHOD = auto()
+
+class ClassType(Enum):
+    NONE = auto()
+    CLASS = auto()
 
 
 class Resolver(Visitor):
@@ -45,6 +50,7 @@ class Resolver(Visitor):
         self.scopes: Deque = deque()
         self.error_handler = error_handler
         self.current_function = FunctionType.NONE
+        self.current_class = ClassType.NONE
 
     def resolve(self, statements: list[Stmt]):
         self._resolve_statements(statements)
@@ -104,6 +110,8 @@ class Resolver(Visitor):
         return None
 
     def visit_class_stmt(self, stmt: Class):
+        enclosing_class = self.current_class
+        self.current_class = ClassType.CLASS
         self._declare(stmt.name)
         self._define(stmt.name)
 
@@ -112,9 +120,12 @@ class Resolver(Visitor):
 
         for method in stmt.methods:
             declaration = FunctionType.METHOD 
+            if method.name.lexeme == "init":
+                declaration = FunctionType.INITIALIZER
             self._resolve_function(method, declaration)
 
         self._end_scope()
+        self.current_class = enclosing_class
         return None
 
     def visit_expression_stmt(self, stmt: Expression):
@@ -143,6 +154,8 @@ class Resolver(Visitor):
         if self.current_function == FunctionType.NONE:
             self.error_handler.token_error(stmt.keyword, "Can't return from top-level code.")
         if stmt.value is not None:
+            if self.current_function == FunctionType.INITIALIZER:
+                self.error_handler.token_error(stmt.keyword, "Can't return a value from an initializer.")
             self._resolve_expression(stmt.value)
         return None
 
@@ -197,6 +210,9 @@ class Resolver(Visitor):
         self._resolve_expression(expr.obj)
 
     def visit_this_expr(self, expr: This):
+        if self.current_class == ClassType.NONE:
+            self.error_handler.token_error(expr.keyword, "Can't use 'this' outside of a class.")
+            return None
         self._resolve_local(expr, expr.keyword)
         return None
 
